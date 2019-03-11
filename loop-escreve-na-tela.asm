@@ -1,14 +1,24 @@
+;posiciona na tela
+
+mov DH, 10
+mov DL, 30
+mov BH, 0
+mov AH, 2
+int 10h
 
 
+; escreve na tela
 mov si, mensagem
 
 volta:
+    
+    mov al, [si]
     
     ; compara se já for 0 no inicio
     cmp al, 0
     jz fim
     
-    mov al, [si]
+
     mov ah, 0Eh
     int 10h
     
