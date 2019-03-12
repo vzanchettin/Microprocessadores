@@ -1,3 +1,8 @@
+; leitura de teclado
+mov ah, 0h
+int 16h
+
+
 ;posiciona na tela
 
 mov DH, 10
