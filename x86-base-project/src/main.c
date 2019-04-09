@@ -2,8 +2,17 @@
 
 unsigned short *video = (unsigned short *)0xB8000; 
 
+unsigned posx = 0;
+unsigned posy = 0;
+
+unsigned int key = 0;
+unsigned int key_anterior = 0;
+
 unsigned char key_map[150] = {
-    0x00, 0x01, '1', '2', '3', '4', '5', '6'
+    0x00, 0x01, '1',  '2',  '3',  '4',  '5',  '6',  '7',  '8',  '9',  '0',  '-',  '=', 'N/D',
+    'N/D', 'q',  'w',  'e',  'r',  't',  'y',  'u',  'i',  'o',  'p',  '´',  '[',
+    'N/D', 'N/D', 'a',  's',  'd',  'f',  'g',  'h',  'j',  'k',  'l',  'ç',  '~',  ']',
+    'N/D', '\\',  'z',  'x',  'c',  'v',  'b',  'n',  'm',  ',',  '.',  ';',  'N/D'
 };
 
 int main(void)
@@ -27,16 +36,18 @@ int main(void)
         }
     }
 
-
-    printc(1, 2, 0x01, 0x0F, 'F');
-    prints(1, 1, 0x01, 0x0F, "Funciou!");
-
-    int key = 0;
-
     while (1) {
 
         int key = inb(0x60);
-        printc(1, 7, 0x01, 0x0F, key_map[key]);
+        //printc(1, 7, 0x01, 0x0F, key_map[key]);
+
+        if (key != key_anterior ) {
+            printc(posx, posy, 0x01, 0x0F, key_map[key]);
+            posx++;
+            key_anterior = key;
+        }
+
+
     }
 
     return 0;
