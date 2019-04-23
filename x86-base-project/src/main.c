@@ -2,82 +2,148 @@
 
 unsigned short *video = (unsigned short *)0xB8000; 
 
-unsigned posx = 0;
-unsigned posy = 15;
+// https://msdn.microsoft.com/pt-br/windows/desktop/ms890989
+unsigned char key_map[130];
+
+unsigned int posx = 0;
+unsigned int posy = 10;
 
 unsigned int key = 0;
 unsigned int key_anterior = 0;
 
-unsigned int i;
+void printc (int x, int y, int fcolor, int bcolor, int c) {
 
-// https://msdn.microsoft.com/pt-br/windows/desktop/ms890989
-unsigned char key_map[150];
+    video[x + y * 80] = (fcolor << 8) | (bcolor << 12) | c;
+}
 
-unsigned char key_map_temp[150] = {
-    0x00, 0x01, '1',  '2',  '3',  '4',  '5',  '6',  '7',  '8',  '9',  '0',  '-',  '=', 'N/D',
-    'N/D', 'q',  'w',  'e',  'r',  't',  'y',  'u',  'i',  'o',  'p',  '´',  '[',
-    'N/D', 'N/D', 'a',  's',  'd',  'f',  'g',  'h',  'j',  'k',  'l',  'ç',  '~',  ']',
-    'N/D', '\\',  'z',  'x',  'c',  'v',  'b',  'n',  'm',  ',',  '.',  ';',  'N/D'
-};
+void prints (int x, int y, int fcolor, int bcolor, char *str) {
+
+    int inicio = x + y * 80;
+
+    while (*str) {
+
+        video[inicio] = (fcolor << 8) | (bcolor << 12) | *str;
+
+        inicio++;
+        str++;
+    }
+}
+
+void inicializa_vetor(void) {
+
+    /*
+    int i = 0;
+
+    for (i = 0; i < 130; i++) {
+        key_map[i] = '*';
+    }*/
+
+    key_map[0] = 0x00;
+    key_map[1] = 0x01;
+    key_map[2] = '1';
+    key_map[3] = '2';
+    key_map[4] = '3';
+    key_map[5] = '4';
+    key_map[6] = '5';
+    key_map[7] = '6';
+    key_map[8] = '7';
+    key_map[9] = '8';
+    key_map[10] = '9';
+    key_map[11] = '0';
+    key_map[12] = '-';
+    key_map[13] = '=';
+    key_map[16] = 'q';
+    key_map[17] = 'w';
+    key_map[18] = 'e';
+    key_map[19] = 'r';
+    key_map[20] = 't';
+    key_map[21] = 'y';
+    key_map[22] = 'u';
+    key_map[23] = 'i';
+    key_map[24] = 'o';
+    key_map[25] = 'p';
+    key_map[26] = '?';
+    key_map[27] = '[';
+    key_map[30] = 'a';
+    key_map[31] = 's';
+    key_map[32] = 'd';
+    key_map[33] = 'f';
+    key_map[34] = 'g';
+    key_map[35] = 'h';
+    key_map[36] = 'j';
+    key_map[37] = 'k';
+    key_map[38] = 'l';
+    key_map[39] = '?';
+    key_map[40] = '~';
+    key_map[41] = '"';
+    key_map[43] = ']';
+    key_map[44] = 'z';
+    key_map[45] = 'x';
+    key_map[46] = 'c';
+    key_map[47] = 'v';
+    key_map[48] = 'b';
+    key_map[49] = 'n';
+    key_map[50] = 'm';
+    key_map[51] = ',';
+    key_map[52] = '.';
+    key_map[53] = ';';
+    key_map[57] = ' ';
+    key_map[71] = '7';
+    key_map[72] = '8';
+    key_map[73] = '9';
+    key_map[74] = '-';  
+    key_map[75] = '4';
+    key_map[76] = '5';
+    key_map[77] = '6';
+    key_map[78] = '+';
+    key_map[79] = '1';
+    key_map[80] = '2';
+    key_map[81] = '3';
+    key_map[82] = '0';
+    key_map[83] = ',';
+}
+
+char letra(int key_scan) {
+
+    key = key_scan;
+    char dado;
+/*
+    if (key >= 130) {
+
+        return -1;
+    }
+
+    if (key_map[key] == '*') {
+
+        return -1;
+    }
+   */ 
+    if (key != key_anterior) {
+
+        key_anterior = key;
+        dado = key_map[key];
+    }
+    return dado;
+}
 
 
-
-
+void desenha_tela(void) {
+    
+    int line = 0;
+    for (line = 0; line <= 60; line++) {
+        printc(line, 14, 0x01, 0x0F, '-');
+    }
+}
 
 int main(void)
 {
-
-    // zera o teclado
-    for (i = 0; i <= 150; i++) {
-        key_map[i] = -1;
-    }
-
-    key_map[0] = 0x00; key_map[1] = 0x01; key_map[2] = '1'; key_map[3] = '2'; key_map[4] = '3';
-
-
-
-    void printc (int x, int y, int fcolor, int bcolor, int c) {
-
-        video[x + y * 80] = (fcolor << 8) | (bcolor << 12) | c;
-    }
-
-    void prints (int x, int y, int fcolor, int bcolor, char *str) {
-
-        int inicio = x + y * 80;
-
-        while (*str) {
-
-            video[inicio] = (fcolor << 8) | (bcolor << 12) | *str;
-
-            inicio++;
-            str++;
-        }
-    }
-
-    void tela() {
-        
-        int line;
-
-        for (line = 0; line <= 60; line++) {
-            printc(line, 14, 0x01, 0x0F, '-');
-        }
-    }
-
+    
+    inicializa_vetor();
+    desenha_tela();
+    
     while (1) {
-
-        tela();
-        int key = inb(0x60);
-
-        if (key != -1) {
-            key = key_map[key];
-        }
-
-        if (key != key_anterior) {
-            printc(posx, posy, 0x01, 0x0F, key);
-            posx++;
-            key_anterior = key;
-        }
-
+        char leitura = letra(inb(0x60));
+        printc(posx++, posy, 0x01, 0x0F, leitura);
 
     }
 
