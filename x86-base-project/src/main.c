@@ -1,22 +1,22 @@
 #include <sys/io.h>
 
-unsigned short *video = (unsigned short *)0xB8000; 
+volatile unsigned short *video = (unsigned short *)0xB8000;
 
 // https://msdn.microsoft.com/pt-br/windows/desktop/ms890989
-unsigned char key_map[130];
+volatile char key_map[130];
 
-unsigned int posx = 0;
+volatile unsigned int posx = 0;
 unsigned int posy = 10;
 
 unsigned int key = 0;
 unsigned int key_anterior = 0;
 
-void printc (int x, int y, int fcolor, int bcolor, int c) {
+void printc(int x, int y, char fcolor, char bcolor, int c) {
 
     video[x + y * 80] = (fcolor << 8) | (bcolor << 12) | c;
 }
 
-void prints (int x, int y, int fcolor, int bcolor, char *str) {
+void prints(int x, int y, char fcolor, char bcolor, char *str) {
 
     int inicio = x + y * 80;
 
@@ -29,14 +29,32 @@ void prints (int x, int y, int fcolor, int bcolor, char *str) {
     }
 }
 
-void inicializa_vetor(void) {
+void print(int x)
+{
+    int a = x / 1000;
+    x = x % 1000;
 
-    /*
-    int i = 0;
+    printc(0, 24, 0x01, 0x0F, a + '0');
 
-    for (i = 0; i < 130; i++) {
-        key_map[i] = '*';
-    }*/
+    a = x / 100;
+    x = x % 100;
+    printc(1, 24, 0x01, 0x0F, a + '0');
+
+    a = x / 10;
+    x = x % 10;
+    printc(2, 24, 0x01, 0x0F, a + '0');
+
+    a = x / 1;
+    x = x % 1;
+    printc(3, 24, 0x01, 0x0F, a + '0');
+}
+
+void inicializa_teclado(void)
+{
+    int i;
+
+    for (i = 0; i < 130; i++)
+        key_map[i] = -1;
 
     key_map[0] = 0x00;
     key_map[1] = 0x01;
@@ -103,48 +121,37 @@ void inicializa_vetor(void) {
     key_map[83] = ',';
 }
 
-char letra(int key_scan) {
-
-    key = key_scan;
-    char dado;
-/*
-    if (key >= 130) {
-
+char map_key(int scancode)
+{
+    if (scancode < 0 || scancode >= 250)
         return -1;
-    }
 
-    if (key_map[key] == '*') {
+    if (scancode > 130)
+        return -2;
 
-        return -1;
-    }
-   */ 
-    if (key != key_anterior) {
-
-        key_anterior = key;
-        dado = key_map[key];
-    }
-    return dado;
-}
-
-
-void desenha_tela(void) {
-    
-    int line = 0;
-    for (line = 0; line <= 60; line++) {
-        printc(line, 14, 0x01, 0x0F, '-');
-    }
+    return key_map[scancode];
 }
 
 int main(void)
 {
+    char prev_key = 0;
     
-    inicializa_vetor();
-    desenha_tela();
+    inicializa_teclado();
     
     while (1) {
-        char leitura = letra(inb(0x60));
-        printc(posx++, posy, 0x01, 0x0F, leitura);
+        int scancode = inb(0x60);
 
+        print(scancode);
+
+        char key = map_key(scancode);
+        if (key >= 0 && key != prev_key) {
+            prev_key = key;
+
+            printc(posx, posy, 0x01, 0x0F, key);
+            posx++;
+        } else if (key == -2) {
+            prev_key = 0;
+        }
     }
 
     return 0;
