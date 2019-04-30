@@ -3,13 +3,13 @@
 volatile unsigned short *video = (unsigned short *)0xB8000;
 
 // https://msdn.microsoft.com/pt-br/windows/desktop/ms890989
-volatile char key_map[130];
+char key_map[250];
 
-volatile unsigned int posx = 0;
+unsigned int posx = 0;
 unsigned int posy = 10;
 
-unsigned int key = 0;
-unsigned int key_anterior = 0;
+int key = 0;
+int key_anterior = 0;
 
 void printc(int x, int y, char fcolor, char bcolor, int c) {
 
@@ -53,8 +53,10 @@ void inicializa_teclado(void)
 {
     int i;
 
-    for (i = 0; i < 130; i++)
+    for (i = 0; i < 250; i++) {
+
         key_map[i] = -1;
+    }
 
     key_map[0] = 0x00;
     key_map[1] = 0x01;
@@ -123,34 +125,36 @@ void inicializa_teclado(void)
 
 char map_key(int scancode)
 {
-    if (scancode < 0 || scancode >= 250)
-        return -1;
 
-    if (scancode > 130)
-        return -2;
+    if (scancode > 130 || scancode < 0) {
+
+        return -1;
+    } else {
 
     return key_map[scancode];
+    }
 }
 
 int main(void)
 {
-    char prev_key = 0;
-    
+
     inicializa_teclado();
-    
+
     while (1) {
         int scancode = inb(0x60);
 
-        print(scancode);
+        
 
-        char key = map_key(scancode);
-        if (key >= 0 && key != prev_key) {
-            prev_key = key;
+        key = map_key(scancode);
+
+        if (key != key_anterior && key > 0) {
+
+            print(key);
 
             printc(posx, posy, 0x01, 0x0F, key);
+
             posx++;
-        } else if (key == -2) {
-            prev_key = 0;
+            key_anterior = key;
         }
     }
 
