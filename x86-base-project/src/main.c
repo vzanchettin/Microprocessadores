@@ -84,6 +84,7 @@ void inicializa_teclado(void)
     key_map[25] = 'p';
     key_map[26] = '?';
     key_map[27] = '[';
+    key_map[28] = '+';
     key_map[30] = 'a';
     key_map[31] = 's';
     key_map[32] = 'd';
@@ -129,7 +130,12 @@ char map_key(int scancode)
     if (scancode > 130 || scancode < 0) {
 
         return -1;
-    } else {
+    } else if (scancode == 28) {
+
+        return key_map[scancode];
+    }
+    
+    else {
 
     return key_map[scancode];
     }
@@ -143,17 +149,20 @@ int main(void)
     while (1) {
         int scancode = inb(0x60);
 
-        
+        //print(scancode);
 
         key = map_key(scancode);
 
-        if (key != key_anterior && key > 0) {
+        if (key != key_anterior && key > 0 && key != '+') {
 
             print(key);
-
             printc(posx, posy, 0x01, 0x0F, key);
 
             posx++;
+            key_anterior = key;
+        } else if (key != key_anterior && key == '+') {
+            posy++;
+            posx = 0;
             key_anterior = key;
         }
     }
